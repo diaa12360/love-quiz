@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>قدّيش بتعرفيني؟ 💖</title>
+<style>
+  :root{
+    --bg:#0f0f13;
+    --card:#171821;
+    --accent:#ff5ea8;
+    --accent-2:#7cf3ff;
+    --text:#f6f7fb;
+    --muted:#a9adc2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Kufi Arabic", "Droid Arabic Kufi", "Tahoma", Arial, sans-serif;
+    background: radial-gradient(1200px 800px at 80% -20%, rgba(255,94,168,0.15), transparent 60%),
+                radial-gradient(900px 600px at -10% 120%, rgba(124,243,255,0.12), transparent 60%),
+                var(--bg);
+    color:var(--text); line-height:1.7;
+    min-height:100dvh;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .app{
+    width: min(780px, 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+    overflow:hidden;
+  }
+  header{
+    padding:20px 24px; border-bottom:1px dashed rgba(255,255,255,0.08);
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    background: linear-gradient(90deg, rgba(255,94,168,0.08), rgba(124,243,255,0.08));
+  }
+  h1{font-size: clamp(22px, 2.8vw, 28px); margin:0}
+  .sub{color:var(--muted); font-size:14px}
+  .pill{
+    padding:8px 14px; border-radius:999px; background:rgba(255,255,255,0.06); color:var(--text);
+    border:1px solid rgba(255,255,255,0.12); font-size:13px;
+  }
+  main{padding: 20px; display:grid; gap:16px}
+  .card{
+    background: var(--card);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:16px; padding:16px;
+  }
+  .question{
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .q-title{font-weight:700; font-size:18px}
+  .options{display:grid; gap:10px}
+  .option{
+    background:rgba(255,255,255,0.04);
+    padding:12px 14px; border-radius:12px; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.08);
+    transition: transform .1s ease, background .2s ease, border-color .2s ease;
+    user-select:none;
+  }
+  .option:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,0.18) }
+  .option.correct{border-color: rgba(124,243,255,0.6); background: rgba(124,243,255,0.08)}
+  .option.wrong{border-color: rgba(255,94,168,0.6); background: rgba(255,94,168,0.08)}
+  .reveal{
+    margin-top:10px; padding:12px; border-radius:12px; font-size:14px;
+    background: linear-gradient(180deg, rgba(124,243,255,0.10), rgba(124,243,255,0.02));
+    border:1px dashed rgba(124,243,255,0.35);
+    display:none;
+  }
+  .progress{
+    height:10px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.08); margin-top:6px;
+  }
+  .bar{height:100%; width:0%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition:width .6s ease}
+  .footer{
+    display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .btn{
+    padding:10px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.14);
+    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    color:var(--text); cursor:pointer; font-weight:600;
+  }
+  .btn[disabled]{opacity:.5; cursor:not-allowed}
+  .hidden{display:none !important}
+  /* confetti hearts */
+  .heart{
+    position: fixed; top:-20px; font-size:14px; animation: fall linear forwards; opacity:0.9; pointer-events:none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  }
+  @keyframes fall{
+    to{ transform: translate3d(var(--tx,0px), 110vh, 0) rotate(360deg) }
+  }
+  .final{
+    text-align:center; padding:24px 16px; border-radius:16px;
+    border:1px solid rgba(255,255,255,0.10);
+    background:linear-gradient(180deg, rgba(255,94,168,0.08), rgba(124,243,255,0.08));
+  }
+  .final h2{margin:0 0 10px}
+  .tiny{font-size:12px; color:var(--muted)}
+  .edit-hint{font-size:12px; color:var(--muted); margin-top:6px}
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>قدّيش بتعرفيني؟</h1>
+        <div class="sub">لـ <span id="herName">حبيبتي</span> — لعبة حب بمناسبة عيد ميلادِك 🎂</div>
+      </div>
+      <div class="pill" id="scorePill">0 / 0</div>
+    </header>
+
+    <main>
+      <div class="card">
+        <div class="footer">
+          <div>
+            <div>التقدّم</div>
+            <div class="progress"><div class="bar" id="bar"></div></div>
+          </div>
+          <button class="btn" id="restartBtn">إعادة من البداية</button>
+        </div>
+      </div>
+
+      <div id="quiz"></div>
+
+      <div id="final" class="final hidden">
+        <h2>خلصنا اللعبة 🎉</h2>
+        <p id="finalMsg">كل جواب صح كان رسالة حب صغيرة… والهدية الكبيرة؟ إنك حياتي كلّها 💗</p>
+        <div class="tiny">فيكِ ترجعي لأي سؤال وتشوفي الذكريات من جديد.</div>
+      </div>
+
+      <div class="card">
+        <div class="q-title">ملاحظة للتعديل 👇</div>
+        <div class="edit-hint">بدّك تغيّر الاسم/الأسئلة/الألوان؟ افتح الملف بأي محرّر نصوص ودوّر على <code>config</code> و <code>questions</code> تحت. كل شي سهل وواضح.</div>
+      </div>
+    </main>
+  </div>
+
+<script>
+// ================== config ==================
+const config = {
+  herName: "منونتي",
+  finalMessage: "هديتي الحقيقية إني معك. شكراً لأنك سبب ابتسامتي كل يوم ❤️❤️❤️❤️❤️🫂"
+};
+
+const questions = [
+  {
+    q: "أول دلع ناديتك فيه؟",
+    jawabat: ["حبوبتي", "قلبي", "كتكوتي", "منونتي"],
+    correct: 3,
+    reveal: "من يومها وإنتِ لقب ما بيتكرر — \"منونتي\" ❤️❤️❤️❤️❤️🫂."
+  },
+  {
+    q: "أكتر وقت بتحبي فيه قهوتك؟",
+    jawabat: ["الصبح", "بعد الغداء", "بالليل", "وقت الشغل"],
+    correct: 0,
+    reveal: "قهوتك الصبح = أجمل بداية لنهاري لأن صوتك معها بيصير أحن."
+  },
+  {
+    q: "أول فيلم حضرناه سوى (أونلاين)؟",
+    jawabat: ["La La Land", "Up", "The Notebook", "Inside Out"],
+    correct: 3,
+    reveal: "بكّينا وضحكنا على نفس المشاهد، وهاد السبب اللي خلّاني أتأكد إنو مزاجنا واحد."
+  },
+  {
+    q: "أكتر إيموجي بتبعتِيه إلي؟",
+    jawabat: ["🥹", "😍", "😂", "😴"],
+    correct: 0,
+    reveal: "الإيموجي هاد صار توقيعك الرسمي، بحفظه من بين مليون رسالة."
+  },
+  {
+    q: "لو رحنا رحلة، أوّل مدينة بحلم نزورها معك؟",
+    jawabat: ["إسطنبول", "باريس", "دبي", "بيروت"],
+    correct: 1,
+    reveal: "مش عشان البرج بس؛ عشان نصوّر ضحكتِك بكل زاوية."
+  },
+  {
+    q: "شو اللون المفضّل عندِك؟",
+    jawabat: ["وردي", "أسود", "أزرق", "بنفسجي"],
+    correct: 3,
+    reveal: "كل الألوان حلوة عليكِ، بس البنفسجي بيعمل هالة سحر حواليك."
+  },
+  {
+    q: "أكتر وجبة بتحبيها؟",
+    jawabat: ["بيتزا", "سوشي", "مطبخ البيت", "مكرونة"],
+    correct: 2,
+    reveal: "أطيب لقمة هي اللي فيها حب — وطبخك مافي مثله."
+  }
+];
+
+/*const questions = [
+  {
+    q: "أول كلمة ناديتك فيها؟",
+    jawabat: ["جميلتي", "قلبي", "أميرتي", "يا عيون قلبي"],
+    correct: 2,
+    reveal: "من يومها وإنتِ لقب ما بيتكرر — \"أميرتي\"."
+  },
+  {
+    q: "أكتر وقت بتحبي فيه قهوتك؟",
+    jawabat: ["الصبح", "بعد الغداء", "بالليل", "وقت الشغل"],
+    correct: 0,
+    reveal: "قهوتك الصبح = أجمل بداية لنهاري لأن صوتك معها بيصير أحن."
+  },
+  {
+    q: "أول فيلم حضرناه سوى (أونلاين)؟",
+    jawabat: ["La La Land", "Up", "The Notebook", "Inside Out"],
+    correct: 3,
+    reveal: "بكّينا وضحكنا على نفس المشاهد، وهاد السبب اللي خلّاني أتأكد إنو مزاجنا واحد."
+  },
+  {
+    q: "أكتر إيموجي بتبعتِيه إلي؟",
+    jawabat: ["🥹", "😍", "😂", "😴"],
+    correct: 0,
+    reveal: "الإيموجي هاد صار توقيعك الرسمي، بحفظه من بين مليون رسالة."
+  },
+  {
+    q: "لو رحنا رحلة، أوّل مدينة بحلم نزورها معك؟",
+    jawabat: ["إسطنبول", "باريس", "دبي", "بيروت"],
+    correct: 1,
+    reveal: "مش عشان البرج بس؛ عشان نصوّر ضحكتِك بكل زاوية."
+  }
+];*/
+
+// ============== game logic ==================
+const quizEl = document.getElementById('quiz');
+const barEl = document.getElementById('bar');
+const scorePill = document.getElementById('scorePill');
+const finalEl = document.getElementById('final');
+const finalMsg = document.getElementById('finalMsg');
+const restartBtn = document.getElementById('restartBtn');
+document.getElementById('herName').textContent = config.herName;
+finalMsg.textContent = config.finalMessage;
+
+let solved = new Set();
+scorePill.textContent = `0 / ${questions.length}`;
+
+function renderQuiz(){
+  quizEl.innerHTML = '';
+  questions.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card question';
+    card.innerHTML = `
+      <div class="q-title">سؤال ${idx+1}: ${item.q}</div>
+      <div class="options">
+        ${item.jawabat.map((opt, i) => `<div class="option" data-idx="${idx}" data-a="${i}">${opt}</div>`).join('')}
+      </div>
+      <div class="reveal" id="reveal-${idx}">${item.reveal}</div>
+    `;
+    quizEl.appendChild(card);
+  });
+}
+
+function updateProgress(){
+  const score = solved.size;
+  const total = questions.length;
+  scorePill.textContent = `${score} / ${total}`;
+  const percent = Math.round((score/total)*100);
+  barEl.style.width = percent + '%';
+  if(score === total){
+    finalEl.classList.remove('hidden');
+    burstHearts(80);
+  } else {
+    finalEl.classList.add('hidden');
+  }
+}
+
+function burstHearts(n=30){
+  for(let i=0;i<n;i++){
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = Math.random() < .5 ? '💖' : '💗';
+    const x = (Math.random()*100) + 'vw';
+    const tx = (Math.random()*200 - 100) + 'px';
+    const dur = (Math.random()*1.5 + 1.8).toFixed(2);
+    h.style.left = x;
+    h.style.setProperty('--tx', tx);
+    h.style.animationDuration = dur + 's';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(), dur*1000);
+  }
+}
+
+quizEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('.option');
+  if(!btn) return;
+  const idx = +btn.dataset.idx;
+  const a = +btn.dataset.a;
+  const correct = questions[idx].correct;
+
+  if(solved.has(idx)) return;
+
+  if(a === correct){
+    btn.classList.add('correct');
+    solved.add(idx);
+    document.getElementById(`reveal-${idx}`).style.display = 'block';
+    burstHearts(12);
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(()=> btn.classList.remove('wrong'), 700);
+  }
+  const opts = btn.parentElement.querySelectorAll('.option');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  btn.style.pointerEvents = 'auto';
+  updateProgress();
+});
+
+restartBtn.addEventListener('click', () => {
+  solved = new Set();
+  renderQuiz();
+  updateProgress();
+});
+
+renderQuiz();
+updateProgress();
+</script>
+</body>
+</html>
